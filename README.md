@@ -18,7 +18,7 @@ EC2, RDS, EFS and CloudFront.
 ## TODO
 
 * Replace hard-coded values with variables
-* CloudFront distributions with caching behavior for actual sites
+* Add caching for production sites
 
 ## Usage
 
@@ -32,6 +32,11 @@ module "wp_example_com" {
   lb_secret_header = "mysecretvalue" 
   maintenance_mode_enabled = true
   maintenance_mode_allowed_ip = "88.123.123.123"
+
+  sites = [
+    { domain_name = "www.example.com" },
+    { domain_name = "blog.example.net" }
+  ]
 }
 ```
 
