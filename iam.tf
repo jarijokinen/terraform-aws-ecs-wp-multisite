@@ -51,7 +51,7 @@ resource "aws_iam_role" "ecs_task_execution" {
 
 resource "aws_iam_policy" "ecs_task_execution" {
   name        = "ecsTaskExecutionPolicy"
-  description = "Allows ECS tasks to get secrets."
+  description = "Allows ECS tasks to get secrets and pull from ECR."
   policy      = <<-EOT
     {
       "Version": "2012-10-17",
@@ -68,13 +68,27 @@ resource "aws_iam_policy" "ecs_task_execution" {
           "Action": [
             "ecr:BatchCheckLayerAvailability",
             "ecr:GetDownloadUrlForLayer",
-            "ecr:BatchGetImage",
-            "kms:Decrypt",
+            "ecr:BatchGetImage"
+          ],
+          "Resource": [
+            "${aws_ecr_repository.wp.arn}"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "kms:Decrypt"
+          ],
+          "Resource": [
+            "${aws_kms_key.wp.arn}"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
             "secretsmanager:GetSecretValue"
           ],
           "Resource": [
-            "${aws_ecr_repository.wp.arn}",
-            "${aws_kms_key.wp.arn}",
             "${aws_db_instance.wp.master_user_secret.0.secret_arn}"
           ]
         }
