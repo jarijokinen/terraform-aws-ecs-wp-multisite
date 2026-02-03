@@ -147,3 +147,74 @@ resource "aws_iam_role_policy_attachment" "ecs_task" {
   role       = aws_iam_role.ecs_task.name
   policy_arn = aws_iam_policy.ecs_task.arn
 }
+
+# OIDC
+
+data "aws_iam_policy_document" "ecr_push" {
+  version = "2012-10-17"
+
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Federated"
+      identifiers = [var.oidc_provider_arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = var.oidc_subjects
+    }
+  }
+}
+
+resource "aws_iam_role" "ecr_push" {
+  name               = "ecrPushRole"
+  assume_role_policy = data.aws_iam_policy_document.ecr_push.json
+}
+
+resource "aws_iam_policy" "ecr_push" {
+  name   = "ecrPushPolicy"
+  policy = <<-EOT
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ecr:GetAuthorizationToken"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ecr:BatchCheckLayerAvailability",
+            "ecr:InitiateLayerUpload",
+            "ecr:UploadLayerPart",
+            "ecr:CompleteLayerUpload",
+            "ecr:PutImage",
+            "ecr:BatchGetImage",
+            "ecr:GetDownloadUrlForLayer"
+          ],
+          "Resource": [
+            "${aws_ecr_repository.wp.arn}"
+          ]
+        }
+      ]
+    }
+  EOT
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_push_attachment" {
+  role       = aws_iam_role.ecr_push.name
+  policy_arn = aws_iam_policy.ecr_push.arn
+}

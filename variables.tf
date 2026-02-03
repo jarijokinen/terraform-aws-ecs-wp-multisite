@@ -27,3 +27,13 @@ variable "sites" {
     domain_name = string
   }))
 }
+
+variable "oidc_provider_arn" {
+  description = "ARN of the existing OIDC provider"
+  type        = string
+}
+
+variable "oidc_subjects" {
+  type        = list(string)
+  description = "OIDC subjects"
+}
