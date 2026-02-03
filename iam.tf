@@ -203,12 +203,18 @@ resource "aws_iam_policy" "ecr_push" {
             "ecr:CompleteLayerUpload",
             "ecr:PutImage",
             "ecr:BatchGetImage",
-            "ecr:GetDownloadUrlForLayer",
-            "ecs:DescribeTaskDefinition"
+            "ecr:GetDownloadUrlForLayer"
           ],
           "Resource": [
             "${aws_ecr_repository.wp.arn}"
           ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ecs:DescribeTaskDefinition""
+          ],
+          "Resource": "*"
         }
       ]
     }
