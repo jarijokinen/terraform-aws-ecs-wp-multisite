@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 module "site" {
   for_each = { for site in var.sites : site.domain_name => site }
 
