@@ -212,9 +212,33 @@ resource "aws_iam_policy" "ecr_push" {
         {
           "Effect": "Allow",
           "Action": [
-            "ecs:DescribeTaskDefinition""
+            "ecs:DescribeTaskDefinition",
+            "ecs:RegisterTaskDefinition",
+            "ecs:ListTasks",
+            "ecs:DescribeTasks"
           ],
           "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ecs:UpdateService",
+            "ecs:DescribeServices"
+          ],
+          "Resource": ["${aws_ecs_service.wp.arn}"]
+        },
+        {
+          "Effect": "Allow",
+          "Action": "iam:PassRole",
+          "Resource": [
+            "${aws_iam_role.ecs_task_execution.arn}",
+            "${aws_iam_role.ecs_task.arn}"
+          ],
+          "Condition": {
+            "StringEquals": {
+              "iam:PassedToService": "ecs-tasks.amazonaws.com"
+            }
+          }
         }
       ]
     }
