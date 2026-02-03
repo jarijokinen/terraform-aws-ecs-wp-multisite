@@ -1,5 +1,5 @@
 output "aws_region" {
-  value = data.aws_region.current.name
+  value = data.aws_region.current.region
 }
 
 output "aws_ecr_role" {
